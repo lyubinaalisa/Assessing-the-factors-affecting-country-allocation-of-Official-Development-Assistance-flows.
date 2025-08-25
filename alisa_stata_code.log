@@ -1,0 +1,506 @@
+------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  \\ug-uyst-ba-cifs.student.uni-goettingen.de\home\users\alisa.lyub
+> ina\Desktop\alisa_stata_code.log
+  log type:  text
+ opened on:  12 Jun 2025, 17:01:45
+
+. 
+. // Import dataset
+. import excel values.xlsx, firstrow clear
+(25 vars, 2,639 obs)
+
+. 
+. // Descriptive statistics
+. summarize oda_flows donor_gdp recipient_gdp donor_pop recipient_pop donor_po
+> verty recipient_poverty donor_inflation recipient_inflation donor_int_rate r
+> ecipient_int_rate donor_life_exp recipient_life_exp donor_mortality recipien
+> t_mortality donor_old_depend recipient_old_depend donor_young_depend recipie
+> nt_young_depend donor_tuberc recipient_tuberc
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+   oda_flows |      2,639    .4575737    2.774893          0   59.06869
+   donor_gdp |      2,639    .0389635    .0106527     .02019   .0827694
+recipient~dp |      2,639    .0091511    .0088259          0   .0403958
+   donor_pop |      2,639    1.05e+08    8.62e+07   2.93e+07   3.35e+08
+recipient~op |      2,639    1.21e+07    2.13e+07     377419   8.53e+07
+-------------+---------------------------------------------------------
+donor_pove~y |      2,639    2.317241    6.209509          0       20.6
+recipien~rty |      2,639    7.003448    9.310818          0       41.9
+donor_infl~n |      2,639    1.733827    1.788377  -2.324922     11.489
+recipient_~n |      2,639    14.97261    46.71834  -9.898689   661.5041
+donor_int_~e |      2,639    1.635125    2.172189  -4.301167   8.091711
+-------------+---------------------------------------------------------
+recipient_~e |      2,639    1.343585     9.18367  -63.88726   37.92865
+donor_life~p |      2,639    80.30184     2.05449   75.62195      84.56
+recipient~xp |      2,639    74.97675    3.906172     66.218   83.50732
+donor_mort~y |      2,639    4.244828    1.352653        1.8        7.9
+recipien~ity |      2,639    9.338727    6.906916        1.8       44.2
+-------------+---------------------------------------------------------
+donor_old_~d |      2,639    27.52034    7.056718   17.68335   50.28468
+rec~d_depend |      2,639    20.32124    5.826979   8.234097   36.18837
+donor_youn~d |      2,639    25.14284    3.785219   19.08399    33.1168
+rec~g_depend |      2,639    27.60318     7.02202   19.44994   53.86388
+donor_tuberc |      2,639    7.593103    6.317323          0         36
+-------------+---------------------------------------------------------
+recipient_~c |      2,639    29.27958    34.88515          0        142
+
+. 
+. // Visualize ODA flows from each donor-country by recipient-country
+. twoway (line oda_flows year if donor == "Canada", ///
+>         by(recipient, legend(off) title("ODA flows from Canada"))), ///
+>          ytitle("ODA flows") xtitle("Year")
+
+.          graph export "oda_Canada.png", replace width(1000)
+(file oda_Canada.png written in PNG format)
+
+. 
+. twoway (line oda_flows year if donor == "France", ///
+>         by(recipient, legend(off) title("ODA flows from France"))), ///
+>          ytitle("ODA flows") xtitle("Year")
+
+.          graph export "oda_France.png", replace width(1000)
+(file oda_France.png written in PNG format)
+
+.          
+. twoway (line oda_flows year if donor == "Germany", ///
+>         by(recipient, legend(off) title("ODA flows from Germany"))), ///
+>          ytitle("ODA flows") xtitle("Year")
+
+.          graph export "oda_Germany.png", replace width(1000)
+(file oda_Germany.png written in PNG format)
+
+.          
+. twoway (line oda_flows year if donor == "Italy", ///
+>         by(recipient, legend(off) title("ODA flows from Italy"))), ///
+>          ytitle("ODA flows") xtitle("Year")
+
+.          graph export "oda_Italy.png", replace width(1000)
+(file oda_Italy.png written in PNG format)
+
+.          
+. twoway (line oda_flows year if donor == "Japan", ///
+>         by(recipient, legend(off) title("ODA flows from Japan"))), ///
+>          ytitle("ODA flows") xtitle("Year")
+
+.          graph export "oda_Japan.png", replace width(1000)
+(file oda_Japan.png written in PNG format)
+
+.          
+. twoway (line oda_flows year if donor == "United Kingdom", ///
+>         by(recipient, legend(off) title("ODA flows from United Kingdom"))), 
+> ///
+>          ytitle("ODA flows") xtitle("Year")
+
+.          graph export "oda_UK.png", replace width(1000)
+(file oda_UK.png written in PNG format)
+
+.           
+. twoway (line oda_flows year if donor == "United States", ///
+>         by(recipient, legend(off) title("ODA flows from United States"))), /
+> //
+>          ytitle("ODA flows") xtitle("Year")
+
+.          graph export "oda_USA.png", replace width(1000)
+(file oda_USA.png written in PNG format)
+
+.         
+. // Modify string variable for panel regression 
+. encode pair, gen(pair_num)
+
+. xtset pair_num year
+       panel variable:  pair_num (strongly balanced)
+        time variable:  year, 1995 to 2023
+                delta:  1 unit
+
+. 
+. // Run a panel regression with fixed effects
+. xtreg oda_flows donor_gdp recipient_gdp donor_pop recipient_pop donor_povert
+> y recipient_poverty donor_inflation recipient_inflation donor_int_rate recip
+> ient_int_rate donor_life_exp recipient_life_exp donor_mortality recipient_mo
+> rtality donor_old_depend recipient_old_depend donor_young_depend recipient_y
+> oung_depend donor_tuberc recipient_tuberc, fe
+
+Fixed-effects (within) regression               Number of obs     =      2,639
+Group variable: pair_num                        Number of groups  =         91
+
+R-sq:                                           Obs per group:
+     within  = 0.0678                                         min =         29
+     between = 0.1065                                         avg =       29.0
+     overall = 0.0116                                         max =         29
+
+                                                F(20,2528)        =       9.19
+corr(u_i, Xb)  = -0.9777                        Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+   oda_flows |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   donor_gdp |   25.14619   12.71318     1.98   0.048     .2168833     50.0755
+recipient~dp |  -9.777456    21.0976    -0.46   0.643     -51.1478    31.59288
+   donor_pop |   1.36e-09   1.01e-08     0.13   0.893    -1.85e-08    2.13e-08
+recipient~op |  -2.25e-07   3.32e-08    -6.78   0.000    -2.90e-07   -1.60e-07
+donor_pove~y |   .0273958   .0132765     2.06   0.039     .0013618    .0534298
+recipien~rty |   .0007719   .0064583     0.12   0.905    -.0118922     .013436
+donor_infl~n |   .1329126   .0423809     3.14   0.002     .0498078    .2160174
+recipient_~n |  -.0020241   .0017366    -1.17   0.244    -.0054294    .0013813
+donor_int_~e |   .0760188   .0451112     1.69   0.092    -.0124398    .1644775
+recipient_~e |  -.0177001   .0090344    -1.96   0.050    -.0354156    .0000154
+donor_life~p |  -.6721054   .1216231    -5.53   0.000    -.9105966   -.4336143
+recipient~xp |   .3171726   .0648765     4.89   0.000     .1899562    .4443891
+donor_mort~y |  -.1945989   .2221841    -0.88   0.381    -.6302803    .2410825
+recipien~ity |  -.1430861   .0289173    -4.95   0.000    -.1997902    -.086382
+donor_old_~d |   .0231727   .0210734     1.10   0.272    -.0181502    .0644957
+rec~d_depend |  -.0476911   .0288588    -1.65   0.099    -.1042804    .0088981
+donor_youn~d |   .0682442   .0843296     0.81   0.418    -.0971179    .2336064
+rec~g_depend |   .0360776   .0218942     1.65   0.100    -.0068548      .07901
+donor_tuberc |  -.0046339   .0131073    -0.35   0.724    -.0303361    .0210682
+recipient_~c |  -.0010521   .0033408    -0.31   0.753    -.0076031    .0054989
+       _cons |   31.80785   10.31582     3.08   0.002     11.57952    52.03618
+-------------+----------------------------------------------------------------
+     sigma_u |  6.1874587
+     sigma_e |  2.4895149
+         rho |  .86067086   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(90, 2528) = 5.69                    Prob > F = 0.0000
+
+. estimates store fe
+
+. estat ic
+
+Akaike's information criterion and Bayesian information criterion
+
+-----------------------------------------------------------------------------
+       Model |          N   ll(null)  ll(model)      df        AIC        BIC
+-------------+---------------------------------------------------------------
+          fe |      2,639   -6187.48  -6094.878      21   12231.76    12355.2
+-----------------------------------------------------------------------------
+Note: BIC uses N = number of observations. See [R] BIC note.
+
+. 
+. // Run a panel regression with random effects
+. xtreg oda_flows donor_gdp recipient_gdp donor_pop recipient_pop donor_povert
+> y recipient_poverty donor_inflation recipient_inflation donor_int_rate recip
+> ient_int_rate donor_life_exp recipient_life_exp donor_mortality recipient_mo
+> rtality donor_old_depend recipient_old_depend donor_young_depend recipient_y
+> oung_depend donor_tuberc recipient_tuberc, re
+
+Random-effects GLS regression                   Number of obs     =      2,639
+Group variable: pair_num                        Number of groups  =         91
+
+R-sq:                                           Obs per group:
+     within  = 0.0429                                         min =         29
+     between = 0.1565                                         avg =       29.0
+     overall = 0.0606                                         max =         29
+
+                                                Wald chi2(20)     =     128.15
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+   oda_flows |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   donor_gdp |   39.27997   8.905643     4.41   0.000     21.82523    56.73471
+recipient~dp |   -61.0516   14.82202    -4.12   0.000    -90.10223   -32.00096
+   donor_pop |   1.30e-09   1.67e-09     0.78   0.436    -1.97e-09    4.57e-09
+recipient~op |   8.25e-09   5.59e-09     1.48   0.140    -2.70e-09    1.92e-08
+donor_pove~y |   .0148724   .0111228     1.34   0.181    -.0069279    .0366727
+recipien~rty |  -.0070802   .0063869    -1.11   0.268    -.0195982    .0054378
+donor_infl~n |   .1156074   .0397345     2.91   0.004     .0377293    .1934856
+recipient_~n |   -.002178   .0017099    -1.27   0.203    -.0055294    .0011733
+donor_int_~e |   .0948708   .0382252     2.48   0.013     .0199508    .1697909
+recipient_~e |  -.0203531   .0087683    -2.32   0.020    -.0375386   -.0031676
+donor_life~p |  -.3558578   .0816438    -4.36   0.000    -.5158767   -.1958388
+recipient~xp |   .1470256   .0430706     3.41   0.001     .0626089    .2314424
+donor_mort~y |  -.4362792   .1561555    -2.79   0.005    -.7423384   -.1302201
+recipien~ity |  -.0034266   .0192454    -0.18   0.859    -.0411469    .0342937
+donor_old_~d |   .0375459   .0186362     2.01   0.044     .0010195    .0740722
+rec~d_depend |   .0015805   .0202427     0.08   0.938    -.0380944    .0412554
+donor_youn~d |   .0009267    .032496     0.03   0.977    -.0627643    .0646177
+rec~g_depend |    .040241   .0195287     2.06   0.039     .0019654    .0785166
+donor_tuberc |  -.0219259   .0120597    -1.82   0.069    -.0455625    .0017108
+recipient_~c |   .0108747   .0027993     3.88   0.000     .0053882    .0163612
+       _cons |   16.05463   6.656618     2.41   0.016     3.007898    29.10136
+-------------+----------------------------------------------------------------
+     sigma_u |  .91645736
+     sigma_e |  2.4895149
+         rho |  .11934419   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. estimates store re
+
+. 
+. // Check which type of effects is better
+. hausman fe re
+
+Note: the rank of the differenced variance matrix (13) does not equal the
+        number of coefficients being tested (20); be sure this is what you
+        expect, or there may be problems computing the test.  Examine the
+        output of your estimators for anything unexpected and possibly
+        consider scaling your variables so that the coefficients are on a
+        similar scale.
+
+                 ---- Coefficients ----
+             |      (b)          (B)            (b-B)     sqrt(diag(V_b-V_B))
+             |       fe           re         Difference          S.E.
+-------------+----------------------------------------------------------------
+   donor_gdp |    25.14619     39.27997       -14.13378         9.07273
+recipient~dp |   -9.777456     -61.0516        51.27414        15.01387
+   donor_pop |    1.36e-09     1.30e-09        6.25e-11        1.00e-08
+recipient~op |   -2.25e-07     8.25e-09       -2.33e-07        3.27e-08
+donor_pove~y |    .0273958     .0148724        .0125234        .0072491
+recipien~rty |    .0007719    -.0070802         .007852         .000958
+donor_infl~n |    .1329126     .1156074        .0173051        .0147416
+recipient_~n |   -.0020241     -.002178         .000154        .0003035
+donor_int_~e |    .0760188     .0948708        -.018852        .0239552
+recipient_~e |   -.0177001    -.0203531         .002653        .0021765
+donor_life~p |   -.6721054    -.3558578       -.3162477         .090147
+recipient~xp |    .3171726     .1470256         .170147        .0485168
+donor_mort~y |   -.1945989    -.4362792        .2416804        .1580545
+recipien~ity |   -.1430861    -.0034266       -.1396595         .021583
+donor_old_~d |    .0231727     .0375459       -.0143731        .0098377
+rec~d_depend |   -.0476911     .0015805       -.0492717        .0205685
+donor_youn~d |    .0682442     .0009267        .0673175         .077817
+rec~g_depend |    .0360776      .040241       -.0041634        .0098988
+donor_tuberc |   -.0046339    -.0219259         .017292        .0051346
+recipient_~c |   -.0010521     .0108747       -.0119268        .0018234
+------------------------------------------------------------------------------
+                           b = consistent under Ho and Ha; obtained from xtreg
+            B = inconsistent under Ha, efficient under Ho; obtained from xtreg
+
+    Test:  Ho:  difference in coefficients not systematic
+
+                 chi2(13) = (b-B)'[(V_b-V_B)^(-1)](b-B)
+                          =       84.93
+                Prob>chi2 =      0.0000
+                (V_b-V_B is not positive definite)
+
+. // p-value is small, reject null hypothesis, fixed effects are better
+. 
+. // Introduce lags for variables
+. xtset pair_num year
+       panel variable:  pair_num (strongly balanced)
+        time variable:  year, 1995 to 2023
+                delta:  1 unit
+
+. xtreg oda_flows L.donor_gdp L.recipient_gdp L.donor_pop L.recipient_pop L.do
+> nor_poverty L.recipient_poverty L.donor_inflation L.recipient_inflation L.do
+> nor_int_rate L.recipient_int_rate L.donor_life_exp L.recipient_life_exp L.do
+> nor_mortality L.recipient_mortality L.donor_old_depend L.recipient_old_depen
+> d L.donor_young_depend L.recipient_young_depend L.donor_tuberc L.recipient_t
+> uberc, fe
+
+Fixed-effects (within) regression               Number of obs     =      2,548
+Group variable: pair_num                        Number of groups  =         91
+
+R-sq:                                           Obs per group:
+     within  = 0.0651                                         min =         28
+     between = 0.1084                                         avg =       28.0
+     overall = 0.0108                                         max =         28
+
+                                                F(20,2437)        =       8.49
+corr(u_i, Xb)  = -0.9616                        Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+   oda_flows |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   donor_gdp |
+         L1. |   30.99158   14.07438     2.20   0.028       3.3926    58.59056
+             |
+recipient~dp |
+         L1. |  -14.86083   22.56164    -0.66   0.510     -59.1028    29.38114
+             |
+   donor_pop |
+         L1. |   2.22e-09   1.06e-08     0.21   0.833    -1.85e-08    2.29e-08
+             |
+recipient~op |
+         L1. |  -1.66e-07   3.70e-08    -4.50   0.000    -2.39e-07   -9.38e-08
+             |
+donor_pove~y |
+         L1. |   .0137149   .0140795     0.97   0.330    -.0138942     .041324
+             |
+recipien~rty |
+         L1. |    .000785   .0068314     0.11   0.909     -.012611    .0141811
+             |
+donor_infl~n |
+         L1. |   .1560128   .0470856     3.31   0.001      .063681    .2483447
+             |
+recipient_~n |
+         L1. |  -.0058445   .0017632    -3.31   0.001    -.0093021   -.0023869
+             |
+donor_int_~e |
+         L1. |   .1093516   .0471348     2.32   0.020     .0169231      .20178
+             |
+recipient_~e |
+         L1. |  -.0408915   .0091998    -4.44   0.000    -.0589318   -.0228512
+             |
+donor_life~p |
+         L1. |  -.5895425   .1272783    -4.63   0.000    -.8391274   -.3399575
+             |
+recipient~xp |
+         L1. |   .2719796   .0671438     4.05   0.000     .1403148    .4036444
+             |
+donor_mort~y |
+         L1. |  -.4232732   .2361026    -1.79   0.073    -.8862559    .0397094
+             |
+recipien~ity |
+         L1. |  -.1302064   .0306319    -4.25   0.000    -.1902736   -.0701393
+             |
+donor_old_~d |
+         L1. |    .023062   .0223164     1.03   0.302    -.0206991    .0668231
+             |
+rec~d_depend |
+         L1. |  -.0619238   .0305849    -2.02   0.043    -.1218989   -.0019486
+             |
+donor_youn~d |
+         L1. |   .0548694   .0893858     0.61   0.539    -.1204106    .2301495
+             |
+rec~g_depend |
+         L1. |   .0654092    .022922     2.85   0.004     .0204606    .1103577
+             |
+donor_tuberc |
+         L1. |   .0001389   .0135336     0.01   0.992    -.0263997    .0266776
+             |
+recipient_~c |
+         L1. |   -.005031   .0034064    -1.48   0.140    -.0117106    .0016487
+             |
+       _cons |   28.39423   10.70607     2.65   0.008       7.4003    49.38817
+-------------+----------------------------------------------------------------
+     sigma_u |  4.8552321
+     sigma_e |  2.5137423
+         rho |  .78861025   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(90, 2437) = 5.65                    Prob > F = 0.0000
+
+. estimates store fe_lags
+
+. estat ic
+
+Akaike's information criterion and Bayesian information criterion
+
+-----------------------------------------------------------------------------
+       Model |          N   ll(null)  ll(model)      df        AIC        BIC
+-------------+---------------------------------------------------------------
+     fe_lags |      2,548  -5993.186  -5907.387      21   11856.77   11979.48
+-----------------------------------------------------------------------------
+Note: BIC uses N = number of observations. See [R] BIC note.
+
+. 
+. // AIC and BIC values have become smaller, therefore the model has become be
+> tter after adding lags
+. 
+. // Increase the lag value to see how the coefficient estimates change
+. xtset pair_num year
+       panel variable:  pair_num (strongly balanced)
+        time variable:  year, 1995 to 2023
+                delta:  1 unit
+
+. xtreg oda_flows L5.donor_gdp L5.recipient_gdp L5.donor_pop L5.recipient_pop 
+> L5.donor_poverty L5.recipient_poverty L5.donor_inflation L5.recipient_inflat
+> ion L5.donor_int_rate L5.recipient_int_rate L5.donor_life_exp L5.recipient_l
+> ife_exp L5.donor_mortality L5.recipient_mortality L5.donor_old_depend L5.rec
+> ipient_old_depend L5.donor_young_depend L5.recipient_young_depend L5.donor_t
+> uberc L5.recipient_tuberc, fe
+
+Fixed-effects (within) regression               Number of obs     =      2,184
+Group variable: pair_num                        Number of groups  =         91
+
+R-sq:                                           Obs per group:
+     within  = 0.0737                                         min =         24
+     between = 0.1050                                         avg =       24.0
+     overall = 0.0115                                         max =         24
+
+                                                F(20,2073)        =       8.24
+corr(u_i, Xb)  = -0.9498                        Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+   oda_flows |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   donor_gdp |
+         L5. |   12.72775   16.66755     0.76   0.445    -19.95912    45.41463
+             |
+recipient~dp |
+         L5. |  -51.88963   28.71848    -1.81   0.071    -108.2097    4.430429
+             |
+   donor_pop |
+         L5. |   9.84e-09   1.26e-08     0.78   0.434    -1.48e-08    3.45e-08
+             |
+recipient~op |
+         L5. |  -1.35e-07   5.43e-08    -2.48   0.013    -2.42e-07   -2.84e-08
+             |
+donor_pove~y |
+         L5. |  -.0401717   .0199735    -2.01   0.044    -.0793419   -.0010014
+             |
+recipien~rty |
+         L5. |  -.0014398   .0082559    -0.17   0.862    -.0176306     .014751
+             |
+donor_infl~n |
+         L5. |   .1922473   .0613742     3.13   0.002     .0718857    .3126088
+             |
+recipient_~n |
+         L5. |  -.0044983   .0018665    -2.41   0.016    -.0081588   -.0008378
+             |
+donor_int_~e |
+         L5. |   .1687858   .0542831     3.11   0.002     .0623308    .2752409
+             |
+recipient_~e |
+         L5. |  -.0265304    .009878    -2.69   0.007    -.0459023   -.0071585
+             |
+donor_life~p |
+         L5. |  -.5231535   .1865508    -2.80   0.005        -.889    -.157307
+             |
+recipient~xp |
+         L5. |     .59512   .0876271     6.79   0.000     .4232738    .7669662
+             |
+donor_mort~y |
+         L5. |   -.755056   .3155325    -2.39   0.017     -1.37385   -.1362624
+             |
+recipien~ity |
+         L5. |  -.1014621    .041013    -2.47   0.013     -.181893   -.0210311
+             |
+donor_old_~d |
+         L5. |  -.0041324   .0280207    -0.15   0.883     -.059084    .0508193
+             |
+rec~d_depend |
+         L5. |  -.0925993   .0437064    -2.12   0.034    -.1783123   -.0068863
+             |
+donor_youn~d |
+         L5. |  -.0273747    .101061    -0.27   0.787    -.2255663    .1708168
+             |
+rec~g_depend |
+         L5. |   .1208278   .0285248     4.24   0.000     .0648874    .1767681
+             |
+donor_tuberc |
+         L5. |  -.0084698   .0149338    -0.57   0.571    -.0377566    .0208171
+             |
+recipient_~c |
+         L5. |  -.0017036    .003796    -0.45   0.654    -.0091481    .0057408
+             |
+       _cons |   1.731352    15.7526     0.11   0.912    -29.16121    32.62391
+-------------+----------------------------------------------------------------
+     sigma_u |  4.8181856
+     sigma_e |  2.5780239
+         rho |   .7774294   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(90, 2073) = 6.07                    Prob > F = 0.0000
+
+. estimates store fe_fivelags
+
+. estat ic
+
+Akaike's information criterion and Bayesian information criterion
+
+-----------------------------------------------------------------------------
+       Model |          N   ll(null)  ll(model)      df        AIC        BIC
+-------------+---------------------------------------------------------------
+ fe_fivelags |      2,184  -5193.848    -5110.3      21    10262.6   10382.07
+-----------------------------------------------------------------------------
+Note: BIC uses N = number of observations. See [R] BIC note.
+
+. 
+. log close
+      name:  <unnamed>
+       log:  \\ug-uyst-ba-cifs.student.uni-goettingen.de\home\users\alisa.lyub
+> ina\Desktop\alisa_stata_code.log
+  log type:  text
+ closed on:  12 Jun 2025, 17:02:16
+------------------------------------------------------------------------------
